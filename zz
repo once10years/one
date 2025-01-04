@@ -1,0 +1,41 @@
+char *get_next_line(int fd)
+{
+    char *ret;
+    static char *keep;
+    char *freed;
+    int bytes;
+
+    if ((get_errors(&ret, &keep, fd) == 0))
+        return (NULL);
+    if (get_check(ret) == 1)
+    {
+        freed = ret;
+        ret = ft_strchr(ret, '\n');
+        free(freed);
+        keep = get_keep(ret, &keep);
+        return (ret);
+    }
+    while ((bytes = read(fd, keep, BUFFER_SIZE)) > 0)
+    {
+        keep[bytes] = '\0';
+        get_the_line(&ret, &keep, fd);
+        if (get_check(ret) == 1)
+            break;
+    }
+    if (bytes <= 0 && ft_strlen(ret) > 0)
+    {
+        keep = NULL;
+        return (ret);
+    }
+    if (bytes <= 0)
+    {
+        free(keep);
+        keep = NULL;
+        return (NULL);
+    }
+    keep = get_keep(ret, &keep);
+    freed = ret;
+    ret = ft_strchr(ret, '\n');
+    free(freed);
+    return (ret);
+}
